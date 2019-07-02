@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sykean.hmhc.mapper.DeptMapper">
+    <update id="update" parameterType="com.sykean.hmhc.entity.Dept">
+        update bus_dept
+        <set>
+            <if test="zzcode != null ">`zzcode` = #{zzcode},</if>
+            <if test="codeSpelling != null and codeSpelling != '' ">`code_spelling` = #{codeSpelling},</if>
+            <if test="codeName != null and codeName != '' ">`code_name` = #{codeName},</if>
+            <if test="codeAbr != null and codeAbr != '' ">`code_abr` = #{codeAbr},</if>
+            <if test="address != null and address != '' ">`address` = #{address},</if>
+            <if test="contract != null and contract != '' ">`contract` = #{contract},</if>
+            <if test="phone != null and phone != '' ">`phone` = #{phone},</if>
+            <if test="supCode != null and supCode !='' ">`sup_code` = #{supCode},</if>
+            <if test="invalid != null and invalid !='' ">`invalid` = #{invalid},</if>
+            <if test="sortid != null and sortid !='' ">`sortid` = #{sortid},</if>
+            <if test="type != null and type !='' ">`type` = #{type},</if>
+            <if test="provinceId != null and provinceId !='' ">`province_id` = #{provinceId},</if>
+            <if test="cityId != null and cityId !='' ">`city_id` = #{cityId},</if>
+            <if test="areaId != null and areaId !='' ">`area_id` = #{areaId},</if>
+            <if test="longitude != null ">`longitude` = #{longitude},</if>
+            <if test="latitude != null ">`latitude` = #{latitude},</if>
+            <if test="updateUserId != null and updateUserId !='' ">`update_user_id` = #{updateUserId},</if>
+            <if test="updateTime != null ">`update_time` = #{updateTime}</if>
+            
+        </set>
+        where `code` = #{code}
+    </update>
+    <select id="getChildrenList" resultType="com.sykean.hmhc.res.dept.DeptTreeRes" parameterType="String">
+        SELECT
+            `code` as `id`,
+            `sup_code` as `parent_id`,
+            `code_name` as `name`
+        FROM
+            bus_dept
+        WHERE
+            FIND_IN_SET(`code`, getAllDeptIds(#{deptId}))
+    </select>
+    <select id="getParentIds" resultType="String" parameterType="String">
+        
+        SELECT
+            T2.code
+        FROM
+        (
+          SELECT
+            @r AS _id,
+           (
+                SELECT
+                @r := sup_code
+                FROM
+                bus_dept
+                WHERE
+                code = _id
+              ) AS parent_id,
+            @l := @l + 1 AS lvl
+        FROM
+             (SELECT @r := #{deptId}, @l := 0) vars,
+              bus_dept h
+            WHERE
+            @r != 0
+        ) T1
+        JOIN bus_dept T2 ON T1._id = T2.code
+        ORDER BY T1.lvl DESC
+        
+        
+        
+
+    </select>
+    <select id="findChildren" resultType="com.sykean.hmhc.res.dept.DeptListRes">
+        select
+        code,code_name,sup_code
+        from bus_dept
+        where FIND_IN_SET(code, getAllDeptIds(#{deptId}))
+    </select>
+    
+    <select id="sortList" resultType="com.sykean.hmhc.req.DictData.DictDataReq">
+    	select sortid as id,sortid as name from bus_dept
+    	where sup_code = #{id} ORDER BY sortid 
+    </select>
+</mapper>

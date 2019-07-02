@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sykean.hmhc.mapper.UserRoleMapper">
+
+    <select id="findByUserIds" resultType="com.sykean.hmhc.res.role.UserRoleRes">
+        select
+        r.id roleId,r.name roleName,ur.user_id
+        from sys_role r inner join sys_user_role ur on r.id = ur.role_id where ur.user_id in
+        <foreach collection="userIds" open="(" close=")" separator="," index="index" item="userId">
+            #{userId}
+        </foreach>
+    </select>
+</mapper>

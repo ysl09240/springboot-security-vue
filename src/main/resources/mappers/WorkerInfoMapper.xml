@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sykean.hmhc.mapper.WorkerInfoMapper">
+   <select id="findCollectList" resultType="com.sykean.hmhc.res.collect.CollectListRes"
+           parameterType="com.sykean.hmhc.req.collect.CollectSearchReq">
+        select
+          wi.id,
+          wi.s_name as sName,
+          wi.s_nation as sNation,
+          wi.cer_type,
+          wi.cer_no,
+          wi.addr1,
+          ii.create_time,
+          ii.st_id,
+          ii.create_user_id,
+          ii.reason_coll
+         from bus_worker_info wi
+         left join bus_iris_info ii on ii.s_id = wi.s_id
+       <where>
+           <if test="sName != null and sName != ''"> and wi.s_name like concat(concat('%',#{sName}),'%') </if>
+           <if test="sNation != null and sNation != ''"> and wi.s_nation = #{sNation} </if>
+           <if test="cerType != null and cerType != ''"> and wi.cer_type = #{cerType} </if>
+           <if test="cerNo != null and cerNo !=''" >and wi.cer_no = #{cerNo} </if>
+           <if test="addr1 != null and addr1 != ''"> and wi.addr1 like concat(#{addr1},'%') </if>
+           <if test="provinceName != null and provinceName != ''"> and  wi.cer_no like concat(#{provinceId},'%')  or wi.addr1 like concat(#{provinceName},'%') </if>
+           <if test="cityName != null and cityName != ''"> and  wi.cer_no like concat(#{cityId},'%')  or wi.addr1 like concat(#{cityName},'%') </if>
+           <if test="countyName != null and countyName != ''"> and  wi.cer_no like concat(#{countyId},'%')  or wi.addr1 like concat(#{countyName},'%') </if>
+           <if test="stId != null and stId != ''"> and ii.st_id = #{stId} </if>
+            <if test="collectStartTime != null "> and ii.create_time &gt; #{collectStartTime} </if>
+           <if test="collectEndTime != null "> and ii.create_time &lt; #{collectEndTime} </if>
+       </where>
+       order by ii.create_time desc
+   </select>
+    <select id="findById" resultType="com.sykean.hmhc.res.collect.CollectDetailRes">
+        select
+          wi.id,
+          wi.s_name,
+          wi.s_gender,
+          wi.s_country,
+          wi.s_nation,
+          wi.s_birth,
+          wi.cer_type,
+          wi.cer_no,
+          wi.cer_auth,
+          wi.cer_valid,
+          wi.addr1,
+          wi.addr2,
+          ii.tel1,
+          ii.tel2,
+          ii.sec_lev,
+          ii.flg_sync,
+          wi.head_image,
+          ii.create_time,
+          ii.dev_type,
+          ii.st_id,
+          d.code_name AS stName,
+          d.type AS stType,
+          d.longitude,
+          d.latitude,
+          u.real_name AS createUserName,
+          ii.reason_coll,
+          ii.reason_coll_desc,
+          wi.s_sign,
+          ii.flg_force,
+          ii.flg_wo,
+          wi.flg_focus,
+          wi.focus_desc,
+          wi.focus_end_date,
+          ii.iris_l,
+          ii.iris_r,
+          ii.q_l,
+          ii.q_r,
+          ii.iris_face
+        from bus_worker_info wi
+        left join bus_iris_info ii on ii.s_id = wi.s_id
+        left join bus_dept d on d.code = ii.st_id
+        left join sys_user u on ii.create_user_id = u.id
+        where wi.id = #{id}
+    </select>
+    
+    <update id="createTable" parameterType="java.lang.String">
+    	CREATE TABLE ${tableName} LIKE bus_worker_info
+    </update>
+    
+    <select id="findByCerNo" resultType="com.sykean.hmhc.entity.WorkerInfo"
+          parameterType="java.lang.String">
+       select wi.id,wi.s_id,wi.ir_id
+        from bus_worker_info wi
+      <where>
+          <if test="cerNo != null and cerNo != ''"> and wi.cer_no = #{cerNo} </if>
+      </where>
+   </select>
+   <select id="getMaxCode" resultType="java.lang.String"
+          parameterType="java.lang.String">
+       SELECT
+
+		IF (
+			max(substring(s_id, 21, 30)) IS NULL,
+			#{code,jdbcType=VARCHAR},
+			CONCAT(
+				substring(s_id, 1, 20),
+				LPAD(
+					max(substring(s_id, 21, 30)) + 1,
+					10,
+					0
+				)
+			)
+		)
+		FROM
+			bus_worker_info
+		WHERE
+			substring(s_id, 1, 20) = substring(
+				#{code,jdbcType=VARCHAR},
+				1,
+				20
+			)
+   </select>
+</mapper>

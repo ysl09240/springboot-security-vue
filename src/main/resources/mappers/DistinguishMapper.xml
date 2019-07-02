@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sykean.hmhc.mapper.DistinguishMapper">
+
+   <select id="getIrisRecordByParamater" resultType="com.sykean.hmhc.res.iris.IrisRecord" parameterType="com.sykean.hmhc.req.disinguish.DistinguishReq">
+      select bir.id as id,bwi.s_name as name,bwi.s_nation as nation,bwi.cer_type as cerType,bwi.cer_no as cerNo,bwi.addr1 as residenceAddr,
+       bir.create_time as opTime,bir.dzmc as opAddr,bir.op_teller as opWorker,bir.reason_coll as personnelType,bar.rsn_alarm as alarmReason
+      from bus_iris_record bir
+      left join bus_worker_info bwi  on bwi.ir_id=bir.ir_id
+      left join bus_alarm_record bar on bir.ci_id=bar.ci_id
+      <where>
+          1=1
+          <if test="name!=null and name!=''">
+             and bwi.s_name like #{name}
+          </if>
+          <if test="nation!=null and nation!=''">
+              and bwi.s_nation=#{nation}
+          </if>
+          <if test="cerType!=null and cerType!=''">
+              and bwi.cer_type=#{cerType}
+          </if>
+          <if test="cerNo!=null and cerNo!=''">
+              and bwi.cer_no=#{cerNo}
+          </if>
+          <if test="residenceAddr!=null and residenceAddr!=''">
+              and bwi.addr1 like #{residenceAddr}
+          </if>
+          <if test="startTime!=null and startTime!=''">
+              and bir.create_time &gt; #{startTime}
+          </if>
+          <if test="endTime!=null and endTime!=''">
+              and bir.create_time &lt; #{endTime}
+          </if>
+          <if test="opAddr!=null and opAddr!=''">
+              and bir.st_id=#{opAddr}
+          </if>
+      </where>
+       order by bir.create_time desc
+   </select>
+    
+    <select id="totalRecordByParamater" resultType="java.lang.Integer" parameterType="com.sykean.hmhc.req.disinguish.DistinguishReq">
+        select count(*) from  bus_worker_info bwi
+        inner join bus_iris_record bir
+        on bwi.ir_id=bir.ir_id
+        <where>
+            1=1
+            <if test="name!=null and name!=''">
+                and bwi.s_name like #{name}
+            </if>
+            <if test="nation!=null and nation!=''">
+                and bwi.s_nation=#{nation}
+            </if>
+            <if test="cerType!=null and cerType!=''">
+                and bwi.cer_type=#{cerType}
+            </if>
+            <if test="cerNo!=null and cerNo!=''">
+                and bwi.cer_no=#{cerNo}
+            </if>
+            <if test="residenceAddr!=null and residenceAddr!=''">
+                and bwi.addr1 like #{residenceAddr}
+            </if>
+            <if test="startTime!=null and startTime!=''">
+                and bir.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                and bir.create_time &lt; #{endTime}
+            </if>
+            <if test="opAddr!=null and opAddr!=''">
+                and bir.st_id=#{opAddr}
+            </if>
+        </where>
+    </select>
+    <select id="getIrisRecordDetailByWorkerId" parameterType="String" resultType="com.sykean.hmhc.res.iris.IrisRecordDetail">
+        select bir.id as id, bwi.s_name as name,bwi.s_country as country,bwi.s_nation as nation,bwi.s_gender as gender,
+        bwi.s_birth as birthday,bwi.cer_type as cerType,bwi.cer_no as cerNo,bwi.cer_valid as cerValid,
+        bwi.cer_auth as cerAuth,bwi.addr1 as residenceAddr,bwi.addr2 as addr2,bii.tel1 as tel1,bii.tel2 as tel2,
+        bii.create_time as collTime,bd.code_name as collName,bir.st_x as collCoordinateX,bir.st_y as collCoordinateY,
+        bd.type as siteType,bii.coll_name as collWorker,bir.dev_type as devType,bii.reason_coll as collReason,
+        bii.reason_coll_desc as collReasonDesc,bii.flg_force as flgForce,bii.flg_wo as flgWorker,
+        bwi.flg_focus as flgFocus,bwi.focus_desc as flgFocusDesc,bwi.focus_end_date as endFocus,
+        bir.time_coll as collConsumption,bii.iris_l as irisLeft,bii.iris_r as irisRight,bii.q_l as irisLeftQuality,
+        bii.q_r as irisRightQuality,bii.iris_face as facePath,bwi.s_sign as identityLabel,bwi.head_image as headImage,
+        bir.create_time as opTime,bir.op_teller as opTeller,bir.time_jz as jzTime,bir.dev_type as devType,
+        bar.rsn_alarm as alarmReason,bar.rsn_desc as alarmReasonDesc,bir.ir_id as irId,bd.code_name as dzmc,
+        bii.sec_lev as securityLevel,bii.flg_sync as flgSync
+        from  bus_iris_record bir
+        left join bus_iris_info bii on bii.ir_id=bir.ir_id
+        left join bus_worker_info bwi on bwi.ir_id=bir.ir_id
+        left join bus_dept bd on bir.st_id=bd.code
+        left join  bus_alarm_record bar on bir.ci_id=bar.ci_id
+        where bir.id=#{id} limit 1
+    </select>
+    <select id="getIrisRecordInfo" resultType="com.sykean.hmhc.res.iris.IrisRecordInfo">
+        select bir.id,bir.create_time as opTime,bir.op_teller as opTeller,bir.time_jz as jzTime,bir.dev_type as devType,
+        bar.rsn_alarm as alarmReason,bar.rsn_desc as alarmReasonDesc,bd.code_name as dzmc
+        from bus_iris_record bir
+        left join bus_alarm_record bar on bir.ci_id=bar.ci_id
+        left join bus_dept bd on bir.st_id=bd.code
+        <where>
+            <if test="irId!=null and irId!=''">
+                bir.ir_id=#{irId}
+            </if>
+        </where>
+        order by bir.create_time desc limit #{startNo},5
+    </select>
+    <select id="totalDistinguishRecord" resultType="java.lang.Integer">
+        select count(*)
+        from bus_iris_record bir
+        left join bus_alarm_record bar on bir.ci_id=bar.ci_id
+        left join bus_dept bd on bir.st_id=bd.code
+        <where>
+            <if test="irId!=null and irId!=''">
+                bir.ir_id=#{irId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getDistinguishRecord" resultType="com.sykean.hmhc.res.iris.DistinguishVo" parameterType="com.sykean.hmhc.req.disinguish.DistinguishReq">
+        select
+            bwi.s_id as sId,
+            bwi.ir_id as irId,
+            bwi.s_gender as sGender,
+            bwi.s_name  as sName,
+            bwi.s_country as sCountry,
+            bwi.s_nation as sNation,
+            (select d.name from bus_dict_data d where d.type='NATION_TYPE'and d.del_flag=0 and d.value=bwi.s_nation )as sNationName,
+            (select d.name from bus_dict_data d where d.type='CERTIFICATES_TYPE'and d.del_flag=0 and d.value= bwi.cer_type ) as cerTypeName,
+            bwi.cer_type as cerType,
+            DATE_FORMAT(bwi.s_birth,'%Y-%m-%d') as sBirth,
+            bwi.cer_no as cerNo,
+            bwi.cer_auth as cerAuth,
+            bwi.cer_valid as cerValid,
+            bwi.addr1_code as addr1Code,
+            bwi.addr1 as addr1,
+            bwi.addr2_code as addr2Code,
+            bwi.addr2 as addr2,
+            bwi.flg_bind as flgBind,
+            bwi.flg_focus as flgFocus,
+            bwi.focus_end_date as focusEndDate,
+            bwi.focus_desc as focusDesc,
+            bwi.check_state as checkState,
+            bwi.head_image as headImage,
+            bwi.s_sign as sSign,
+            bii.iris_l  as irisL,
+            bii.iris_r as irisR,
+            bii.tel1,
+            bii.tel2,
+            bii.sec_lev as secLev,
+            bii.flg_diff as flgDiff,
+            bii.face_name as faceName,
+           DATE_FORMAT(bii.create_time,'%Y-%m-%d %H:%i:%S') as collTime,
+           bii.dev_type as devType,
+          (select d.name from bus_dict_data d where d.type='DEV_TYPE'and d.del_flag=0 and d.value= bii.dev_type ) as devTypeName,
+            bii.userid,
+            bii.op_teller as opTeller,
+            bii.op_time as opTime,
+          (select d.name from bus_dict_data d where d.type='REASON_COLL'and d.del_flag=0 and d.value= bii.reason_coll ) as reasonColl,
+            bii.reason_coll_desc as reasonCollDesc,
+            bii.coll_num as collNum,
+            bii.coll_name as collName,
+            bii.flg_force as flgForce,
+            bii.flg_eye as flagEye,
+            bii.flg_typein as flgTypein,
+            bii.flg_face as flgFace,
+            bii.path_face as pathFace,
+            bii.path_cer as pathCer,
+            bii.flg_quick as flgQuick,
+            bii.flg_wo as flgWo,
+            bii.jzup_time as jzupTime,
+            bii.time_jz as timeJz,
+            bii.st_id as stId,
+            bii.flg_sync as flgSync,
+            bii.flg_upload as flgUpload,
+            bii.iris_face as irisFace,
+            bii.q_l as qL,
+            bii.q_r as qR,
+            bd.type,
+            bd.code_name as codeName,
+            (select d.name from bus_dict_data d where d.type='SITE_TYPE'and d.del_flag=0 and d.value= bd.type ) as typeName
+        from bus_iris_info bii
+        left join bus_worker_info bwi on bii.ir_id=bwi.ir_id and bii.s_id=bwi.s_id
+        left join bus_dept bd on bd.code = bii.st_id
+        <where>
+            <if test="irId!=null and irId!=''">
+                bii.ir_id = #{irId}
+            </if>
+            <if test="userid!=null and userid!=''">
+                bwi.id = #{userid}
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <select id="getBusIrisRecordsList" resultType="com.sykean.hmhc.res.iris.BusIrisRecordVo" parameterType="com.sykean.hmhc.req.disinguish.DistinguishReq">
+        select
+          bd.code_name as codeName,
+          bir.dzmc,
+          bir.ci_id as ciId,
+          bir.op_time as opTime,
+          bir.time_coll as timeColl,
+          bir.op_teller as opTeller,
+        (select d.name from bus_dict_data d where d.type='DEV_TYPE'and d.del_flag=0 and d.value= bir.dev_type ) as devType,
+          bar.rsn_alarm as rsnAlarm,
+          bar.rsn_desc as rsnDesc,
+          bir.time_jz as timeJz
+        from bus_iris_record bir
+        left join bus_alarm_record bar on bir.ci_id=bar.ci_id
+        left join bus_dept bd on bd.code = bir.st_id
+        <where>
+            <if test="irId!=null and irId!=''">
+                bir.ir_id = #{irId}
+            </if>
+            <if test="ciId!=null and ciId!=''">
+                bwi.ci_id = #{ciId}
+            </if>
+        </where>
+        order by bir.create_time desc
+    </select>
+
+    <select id="getLastOneBusIrisRecords" resultType="com.sykean.hmhc.entity.BusIrisRecord" >
+        select
+        bir.ci_id as ciId
+        from bus_iris_record bir
+        order by bir.create_time desc
+        limit 1
+    </select>
+
+    <insert id="addBusCerRecord" parameterType="com.sykean.hmhc.entity.BusCerRecord">
+        insert into bus_cer_record (
+          id,
+          ci_id,
+          s_name,
+          s_gender,
+          s_country,
+          s_nation,
+          s_birth,
+          cer_type,
+          cer_no,
+          cer_auth,
+          cer_valid,
+          addr1_code,
+          addr1,
+          addr2_code,
+          addr2,
+          tel1,
+          tel2,
+          f_id,
+          op_teller,
+          op_time
+          ) value (
+            #{id},
+            #{ciId},
+            #{sName},
+            #{sGender},
+            #{sCountry},
+            #{sNation},
+            #{sBirth},
+            #{cerType},
+            #{cerNo},
+            #{cerAuth},
+            #{cerValid},
+            #{addr1Code},
+            #{addr1},
+            #{addr2Code},
+            #{addr2},
+            #{tel1},
+            #{tel2},
+            #{fId},
+            #{opTeller},
+            #{opTime}
+          )
+    </insert>
+
+
+    <insert id="addBusIrisRecord" parameterType="com.sykean.hmhc.entity.BusIrisRecord">
+        insert into bus_iris_record (
+            id,
+            ci_id,
+            area_code,
+            op_type,
+            flg_quick,
+            flg_match_to_coll,
+            flg_offline,
+            flg_march,
+            s_id,
+            ir_id,
+            st_id,
+            st_x,
+            st_y,
+            dzmc,
+            chan_id,
+            sec_lev,
+            f_lst,
+            lev_id,
+            rsn_lev,
+            rsn_detail,
+            op_teller,
+            op_time,
+            time_coll,
+            time_verify,
+            time_jz,
+            time_sum,
+            site_type,
+            dev_type,
+            reason_coll,
+            reason_coll_desc,
+            coll_num,
+            coll_name,
+            flg_force,
+            flg_cer,
+            flg_eye,
+            flg_typein,
+            flg_face,
+            path_face,
+            flg_alarm,
+            flg_wo,
+            flg_focus,
+            q_l,
+            q_r,
+            create_user_id,
+           create_time,
+           update_user_id,
+           update_time
+          )  value (
+            #{id},
+            #{ciId},
+            #{areaCode},
+            #{opType},
+            #{flgQuick},
+            #{flgMatchToColl},
+            #{flgOffline},
+            #{flgMarch},
+            #{sId},
+            #{irId},
+            #{stId},
+            #{stX},
+            #{stY},
+            #{dzmc},
+            #{chanId},
+            #{secLev},
+            #{fLst},
+            #{levId},
+            #{rsnLev},
+            #{rsnDetail},
+            #{opTeller},
+            #{opTime},
+            #{timeColl},
+            #{timeVerify},
+            #{timeJz},
+            #{timeSum},
+            #{siteType},
+            #{devType},
+            #{reasonColl},
+            #{reasonCollDesc},
+            #{collNum},
+            #{collName},
+            #{flgForce},
+            #{flgCer},
+            #{flgEye},
+            #{flgTypein},
+            #{flgFace},
+            #{pathFace},
+            #{flgAlarm},
+            #{flgWo},
+            #{flgFocus},
+            #{qL},
+            #{qR},
+            #{createUserId},
+            #{createTime},
+            #{updateUserId},
+            #{updateTime}
+          )
+
+    </insert>
+
+
+    <insert id="addBusAlarmRecord" parameterType="com.sykean.hmhc.entity.BusIrisRecord">
+          INSERT INTO bus_alarm_record (
+            id,
+            ci_id,
+            area_code,
+            st_id,
+            chan_id,
+            rsn_alarm,
+            rsn_desc,
+            s_name,
+            s_gender,
+            cer_type,
+            cer_no,
+            s_country,
+            s_nation,
+            op_teller,
+            op_time,
+            create_user_id,
+            create_time,
+            update_user_id,
+            update_time
+            )VALUES (
+                #{id},
+                #{ciId},
+                #{areaCode},
+                #{stId},
+                #{chanId},
+                #{rsnAlarm},
+                #{rsnDesc},
+                #{sName},
+                #{sGender},
+                #{cerType},
+                #{cerNo},
+                #{sCountry},
+                #{sNation},
+                #{opTeller},
+                #{opTime},
+                #{createUserId},
+                #{createTime},
+                #{updateUserId},
+                #{updateTime}
+            )
+
+    </insert>
+
+
+
+
+
+
+
+
+</mapper>
+

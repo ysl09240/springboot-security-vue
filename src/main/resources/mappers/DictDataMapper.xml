@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sykean.hmhc.mapper.DictDataMapper">
+
+    <select id="findBykeyAndType" parameterType="com.sykean.hmhc.req.DictData.DictDataReq" resultType="java.lang.Integer">
+        select count(*) from bus_dict_data where 1=1 and del_flag = 0
+        <if test="type != null and type != ''">
+            and type = #{type}
+        </if>
+        <if test="value != null">
+            and value = #{value}
+        </if>
+        <if test="id != null and id != ''">
+            and id != #{id}
+        </if>
+    </select>
+
+    <select id="findValByType"  resultType="string" >
+                SELECT NAME
+        FROM
+            bus_dict_data
+        WHERE
+
+        VALUE = #{val}  and type = #{type}  and  ( del_flag is null or del_flag = 0 )  limit 1
+     </select>
+
+    <select id="queryList"  resultType="com.sykean.hmhc.entity.DictData" >
+                SELECT
+            id,
+            NAME,
+
+        VALUE
+
+        FROM
+            bus_dict_data
+        WHERE
+            1 = 1
+            AND type = 'NATION_TYPE'
+            AND ( del_flag IS NULL OR del_flag = 0 )
+    </select>
+
+    <select id="checkRepeatName" parameterType="com.sykean.hmhc.req.DictData.DictDataReq" resultType="java.lang.Integer">
+        select count(*) from bus_dict_data where 1=1 and del_flag = 0
+        <if test="type != null and type != ''">
+			and type = #{type}
+		</if>
+        <if test="name != null and name != ''">
+            and name = #{name}
+        </if>
+        <if test="id != null and id != ''">
+            and id != #{id}
+        </if>
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultType="com.sykean.hmhc.req.DictData.DictDataReq">
+               SELECT
+            *
+        FROM
+            bus_dict_data
+        WHERE 1=1 and del_flag = 0
+           and id = #{id}
+    </select>
+    
+	<select id="queryAll" resultType="com.sykean.hmhc.req.DictData.DictDataReq" 
+           parameterType="com.sykean.hmhc.req.DictData.DictDataReq">
+		select bdd.*,parent.name as typeName
+			from bus_dict_data bdd 
+		LEFT JOIN ( select * from  bus_dict_data where type = 60 and del_flag is null or del_flag = 0) parent 
+			on bdd.type = parent.`value`
+		where 1=1 and (bdd.del_flag is null or bdd.del_flag = 0) 
+		<if test="id != null and id != ''">
+			and bdd.id = #{id,jdbcType=VARCHAR}
+		</if>
+		<if test="name != null and name != ''">
+			and bdd.name LIKE "%"#{name}"%"
+		</if>
+		<if test="type != null and type != ''">
+			and bdd.type = #{type}
+		</if>
+		<if test="value != null">
+			and bdd.value = #{value,jdbcType=VARCHAR}
+		</if>
+		order by  bdd.order_num,bdd.create_time desc 
+	</select>
+	
+	 <select id="findOrderNumSelects" parameterType="com.sykean.hmhc.req.DictData.DictDataReq" resultType="java.lang.Integer">
+        select count(*) from bus_dict_data where 1=1 and del_flag = 0
+        <if test="type != null and type != ''">
+			and type = #{type}
+		</if>
+    </select>
+
+    <select id="findByOrdetAndType" parameterType="com.sykean.hmhc.req.DictData.DictDataReq" resultType="java.lang.Integer">
+        select count(*) from bus_dict_data where 1=1 and del_flag = 0
+        <if test="type != null and type != ''">
+            and type = #{type}
+        </if>
+        <if test="orderNum != null">
+            and order_num = #{orderNum}
+        </if>
+        <if test="id != null and id != ''">
+            and id != #{id}
+        </if>
+    </select>
+    
+    <update id="batchUpdateDesc"  parameterType="java.util.List">
+	      <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+				update bus_dict_data 
+				<set>
+				  order_num=${item}+1
+				</set>
+				where type = #{type} and  order_num = ${item}
+		 </foreach>
+    </update>
+    
+    <update id="batchUpdateAsc"  parameterType="java.util.List">
+	      <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+				update bus_dict_data 
+				<set>
+				  order_num=${item}-1
+				</set>
+				where type = #{type} and  order_num = ${item}
+		 </foreach>
+    </update>
+    
+</mapper>
